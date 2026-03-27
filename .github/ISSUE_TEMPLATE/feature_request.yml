@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a new feature or architectural improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Shared core
+        - Android app
+        - Windows app
+        - GitHub Actions / tooling
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      placeholder: Describe the feature or improvement.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why is this useful?
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes

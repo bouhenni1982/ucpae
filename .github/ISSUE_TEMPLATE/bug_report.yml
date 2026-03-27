@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a defect in the shared core, Android app, Windows app, or tooling.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Shared core
+        - Android app
+        - Windows app
+        - GitHub Actions / tooling
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      placeholder: Describe the issue clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: List the steps that reproduce the issue.
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: OS, Flutter version, device, and any other context.
