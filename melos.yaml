@@ -1,0 +1,12 @@
+name: ucpae_workspace
+packages:
+  - packages/**
+  - apps/**
+
+scripts:
+  pub:get: |
+    cd apps/ucpae_android; flutter pub get
+    cd ../../apps/ucpae_windows; flutter pub get
+  analyze: |
+    cd apps/ucpae_android; flutter analyze
+    cd ../../apps/ucpae_windows; flutter analyze

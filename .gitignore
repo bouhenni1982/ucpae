@@ -1,0 +1,33 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub/
+build/
+
+# Flutter platform build outputs
+**/android/.gradle/
+**/android/app/build/
+**/android/local.properties
+**/ios/Pods/
+**/ios/.symlinks/
+**/linux/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Native libraries copied locally
+apps/ucpae_windows/windows/runner/third_party/lua/lua54.dll
+apps/ucpae_android/android/app/src/main/jniLibs/**/liblua.so
+
+# Worker outputs
+**/bin/
+**/obj/
+**/publish/

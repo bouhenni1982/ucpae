@@ -1,0 +1,17 @@
+name: ucpae_android
+description: Android app for UCPAE.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_tts: ^4.0.2
+  ucpae_core:
+    path: ../../packages/ucpae_core
+
+flutter:
+  uses-material-design: true

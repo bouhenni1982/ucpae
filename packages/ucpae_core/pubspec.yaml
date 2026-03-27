@@ -1,0 +1,18 @@
+name: ucpae_core
+description: Shared Lua engine and models for UCPAE.
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  ffi: ^2.1.2
+  flutter:
+    sdk: flutter
+
+flutter:
+  assets:
+    - assets/lua/core.lua
+    - assets/lua/default_rules.lua
+    - assets/lua/extensions/sample_extension.lua

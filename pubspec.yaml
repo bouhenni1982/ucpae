@@ -1,0 +1,21 @@
+name: echo
+description: Unified Cross-Platform Accessibility Engine boilerplate.
+publish_to: "none"
+
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^2.1.2
+  flutter_tts: ^4.0.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/lua/core.lua
+    - assets/lua/default_rules.lua
+    - assets/lua/extensions/sample_extension.lua

@@ -1,0 +1,62 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  flutter-validation:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Get Android app dependencies
+        working-directory: apps/ucpae_android
+        run: flutter pub get
+
+      - name: Get Windows app dependencies
+        working-directory: apps/ucpae_windows
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed packages apps
+
+      - name: Analyze Android app
+        working-directory: apps/ucpae_android
+        run: flutter analyze
+
+      - name: Analyze Windows app
+        working-directory: apps/ucpae_windows
+        run: flutter analyze
+
+  windows-worker:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Windows worker
+        working-directory: apps/ucpae_windows/windows/worker/Ucpae.AccessibilityWorker
+        run: dotnet restore
+
+      - name: Build Windows worker
+        working-directory: apps/ucpae_windows/windows/worker/Ucpae.AccessibilityWorker
+        run: dotnet build --configuration Release --no-restore
