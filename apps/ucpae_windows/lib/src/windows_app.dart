@@ -88,7 +88,10 @@ class _UcpaeWindowsAppState extends State<UcpaeWindowsApp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(_error ?? (_isRunning ? 'Windows bridge is running.' : 'Starting Windows bridge...')),
+              Text(_error ??
+                  (_isRunning
+                      ? 'Windows bridge is running.'
+                      : 'Starting Windows bridge...')),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: _error == null ? _sendDemoEvent : null,

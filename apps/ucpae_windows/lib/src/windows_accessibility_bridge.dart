@@ -29,7 +29,8 @@ class WindowsAccessibilityBridge {
         _eventsController.add(
           ScreenEvent.fromMap(
             payload.map(
-              (String key, dynamic value) => MapEntry<Object?, Object?>(key, value),
+              (String key, dynamic value) =>
+                  MapEntry<Object?, Object?>(key, value),
             ),
           ),
         );

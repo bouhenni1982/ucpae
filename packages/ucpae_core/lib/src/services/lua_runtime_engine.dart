@@ -30,14 +30,18 @@ class LuaRuntimeEngine {
 
     bindings.luaLOpenLibs(state);
 
-    final String coreScript = await rootBundle.loadString('$_assetPrefix/core.lua');
-    final String rulesScript =
-        await rootBundle.loadString('$_assetPrefix/default_rules.lua');
+    final String coreScript = await rootBundle.loadString(
+      '$_assetPrefix/core.lua',
+    );
+    final String rulesScript = await rootBundle.loadString(
+      '$_assetPrefix/default_rules.lua',
+    );
     final String extensionScript = await rootBundle.loadString(
       '$_assetPrefix/extensions/sample_extension.lua',
     );
 
-    final String bootstrap = '''
+    final String bootstrap =
+        '''
 ucpae_core = (function()
 $coreScript
 end)()
@@ -72,7 +76,8 @@ end
 
     final int callResult = bindings.luaPCallK(state, 1, 1, 0, 0, ffi.nullptr);
     if (callResult != _luaOk) {
-      final String message = _readString(bindings, state, -1) ?? 'Unknown Lua error';
+      final String message =
+          _readString(bindings, state, -1) ?? 'Unknown Lua error';
       bindings.luaSetTop(state, 0);
       throw StateError('Lua runtime failed while handling event: $message');
     }
@@ -82,8 +87,10 @@ end
       return const LuaCommand(type: LuaCommandType.none, payload: '');
     }
 
-    final String action = _readTableStringField(bindings, state, -1, 'action') ?? 'none';
-    final String text = _readTableStringField(bindings, state, -1, 'text') ?? '';
+    final String action =
+        _readTableStringField(bindings, state, -1, 'action') ?? 'none';
+    final String text =
+        _readTableStringField(bindings, state, -1, 'text') ?? '';
     bindings.luaSetTop(state, 0);
 
     return LuaCommand(
@@ -110,22 +117,30 @@ end
     if (Platform.isAndroid) {
       return ffi.DynamicLibrary.open('liblua.so');
     }
-    throw UnsupportedError('Lua runtime is currently configured for Windows and Android only.');
+    throw UnsupportedError(
+      'Lua runtime is currently configured for Windows and Android only.',
+    );
   }
 
-  void _executeChunk(LuaBindings bindings, ffi.Pointer<ffi.Void> state, String script) {
+  void _executeChunk(
+    LuaBindings bindings,
+    ffi.Pointer<ffi.Void> state,
+    String script,
+  ) {
     final ffi.Pointer<Utf8> source = script.toNativeUtf8();
     try {
       final int loadResult = bindings.luaLLoadString(state, source);
       if (loadResult != _luaOk) {
-        final String message = _readString(bindings, state, -1) ?? 'Unknown load error';
+        final String message =
+            _readString(bindings, state, -1) ?? 'Unknown load error';
         bindings.luaSetTop(state, 0);
         throw StateError('Unable to load Lua bootstrap: $message');
       }
 
       final int callResult = bindings.luaPCallK(state, 0, 0, 0, 0, ffi.nullptr);
       if (callResult != _luaOk) {
-        final String message = _readString(bindings, state, -1) ?? 'Unknown call error';
+        final String message =
+            _readString(bindings, state, -1) ?? 'Unknown call error';
         bindings.luaSetTop(state, 0);
         throw StateError('Unable to execute Lua bootstrap: $message');
       }
@@ -134,7 +149,11 @@ end
     }
   }
 
-  void _pushGlobalFunction(LuaBindings bindings, ffi.Pointer<ffi.Void> state, String name) {
+  void _pushGlobalFunction(
+    LuaBindings bindings,
+    ffi.Pointer<ffi.Void> state,
+    String name,
+  ) {
     final ffi.Pointer<Utf8> global = name.toNativeUtf8();
     try {
       bindings.luaGetGlobal(state, global);
@@ -143,7 +162,11 @@ end
     }
   }
 
-  void _pushEventTable(LuaBindings bindings, ffi.Pointer<ffi.Void> state, ScreenEvent event) {
+  void _pushEventTable(
+    LuaBindings bindings,
+    ffi.Pointer<ffi.Void> state,
+    ScreenEvent event,
+  ) {
     bindings.luaCreateTable(state, 0, 7);
     _setStringField(bindings, state, 'type', event.type.name);
     _setStringField(bindings, state, 'role', event.role);
@@ -212,10 +235,18 @@ end
     }
   }
 
-  String? _readString(LuaBindings bindings, ffi.Pointer<ffi.Void> state, int index) {
+  String? _readString(
+    LuaBindings bindings,
+    ffi.Pointer<ffi.Void> state,
+    int index,
+  ) {
     final ffi.Pointer<ffi.Size> length = malloc<ffi.Size>();
     try {
-      final ffi.Pointer<Utf8> value = bindings.luaToLString(state, index, length);
+      final ffi.Pointer<Utf8> value = bindings.luaToLString(
+        state,
+        index,
+        length,
+      );
       if (value == ffi.nullptr) {
         return null;
       }

@@ -1,5 +1,8 @@
 name: build-windows-app
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   workflow_dispatch:
   push:
@@ -16,7 +19,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2.21.0
@@ -48,9 +51,9 @@ jobs:
       - name: Build lua54.dll
         shell: pwsh
         run: |
-          $src = "$PWD\third_party\lua\lua-5.4.8\src"
+          $src = Resolve-Path 'third_party\lua\lua-5.4.8\src'
           $sources = Get-ChildItem $src\*.c | Where-Object { $_.Name -notin @('lua.c', 'luac.c') } | ForEach-Object { $_.FullName }
-          $outDir = "$PWD\apps\ucpae_windows\windows\runner\third_party\lua"
+          $outDir = Resolve-Path 'apps\ucpae_windows\windows\runner\third_party\lua'
           New-Item -ItemType Directory -Force $outDir | Out-Null
           cl /nologo /O2 /MD /DLUA_BUILD_AS_DLL /DLUA_USE_WINDOWS /I $src $sources /link /DLL /OUT:"$outDir\lua54.dll"
 
@@ -77,7 +80,7 @@ jobs:
       - name: Bundle worker with app
         shell: pwsh
         run: |
-          $bundle = "$PWD\apps\ucpae_windows\build\windows\x64\runner\Release"
+          $bundle = Resolve-Path 'apps\ucpae_windows\build\windows\x64\runner\Release'
           New-Item -ItemType Directory -Force "$bundle\worker" | Out-Null
           Copy-Item 'apps\ucpae_windows\windows\worker\Ucpae.AccessibilityWorker\publish\Ucpae.AccessibilityWorker.exe' "$bundle\worker\Ucpae.AccessibilityWorker.exe" -Force
           Copy-Item 'apps\ucpae_windows\windows\runner\third_party\lua\lua54.dll' "$bundle\lua54.dll" -Force

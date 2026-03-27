@@ -88,7 +88,10 @@ class _UcpaeAndroidAppState extends State<UcpaeAndroidApp> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(_error ?? (_isRunning ? 'Android bridge is running.' : 'Starting Android bridge...')),
+              Text(_error ??
+                  (_isRunning
+                      ? 'Android bridge is running.'
+                      : 'Starting Android bridge...')),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: _error == null ? _sendDemoEvent : null,
