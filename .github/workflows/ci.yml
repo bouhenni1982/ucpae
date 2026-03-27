@@ -38,9 +38,17 @@ jobs:
         working-directory: apps/ucpae_android
         run: flutter analyze
 
+      - name: Test Android app
+        working-directory: apps/ucpae_android
+        run: flutter test
+
       - name: Analyze Windows app
         working-directory: apps/ucpae_windows
         run: flutter analyze
+
+      - name: Test Windows app
+        working-directory: apps/ucpae_windows
+        run: flutter test
 
   windows-worker:
     runs-on: windows-latest

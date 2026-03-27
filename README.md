@@ -24,9 +24,9 @@ This keeps each app smaller and easier to maintain:
 - `packages/ucpae_core`
   Shared models, Lua FFI runtime, and Lua rules.
 - `apps/ucpae_android`
-  Android Flutter app, `AccessibilityService`, Android TTS, and `liblua.so` integration.
+  Android Flutter app, official Android scaffold, `AccessibilityService`, Android TTS, and `liblua.so` integration.
 - `apps/ucpae_windows`
-  Windows Flutter app, UI Automation worker, Windows TTS, and `lua54.dll` integration.
+  Windows Flutter app, official Windows scaffold, UI Automation worker, Windows TTS, and `lua54.dll` integration.
 - `scripts`
   Bootstrap, native library preparation, and local development helpers.
 - `.github/workflows`
@@ -38,16 +38,19 @@ What is already in place:
 
 - Shared `LuaRuntimeEngine` through Dart FFI
 - Shared Lua rules and extension structure
+- Official Flutter scaffold for both Android and Windows apps
 - Android accessibility bridge prototype
 - Windows worker prototype for UI Automation
-- GitHub Actions for CI, worker build, and shared artifacts
+- GitHub Actions for CI, worker build, shared artifacts, analysis, and tests
+- Local `flutter analyze` passes for both apps
+- Local `flutter test` passes for both apps
 
 What still needs completion for full production builds:
 
-- Full Flutter platform scaffolding for each app
-- Final Android packaging pipeline
-- Final Windows desktop packaging pipeline
+- Final Android packaging pipeline with real `liblua.so`
+- Final Windows desktop packaging pipeline with real `lua54.dll`
 - Automatic native library bundling during release builds
+- End-to-end on-device accessibility validation
 
 ## Quick Start
 
@@ -85,7 +88,7 @@ Windows:
 ## GitHub Actions
 
 - [ci.yml](./.github/workflows/ci.yml)
-  Runs dependency resolution, format checks, Flutter analysis, and Windows worker build.
+  Runs dependency resolution, format checks, Flutter analysis, Flutter tests, and Windows worker build.
 - [packaging-assets.yml](./.github/workflows/packaging-assets.yml)
   Publishes the Windows worker and shared Lua assets as artifacts.
 - [native-libs-check.yml](./.github/workflows/native-libs-check.yml)
@@ -99,9 +102,8 @@ Arabic technical explanation is available in:
 
 ## Notes
 
-- The current GitHub Actions setup is suitable for validation and artifact generation.
-- It does not yet produce final Android APK/AAB or final Windows release bundles.
 - Native Lua binaries are intentionally not committed to the repository.
+- CI currently validates the repository structure and application code, but final platform release builds still depend on supplying the native Lua binaries.
 
 ## License
 
