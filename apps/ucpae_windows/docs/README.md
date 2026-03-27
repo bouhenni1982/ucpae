@@ -9,12 +9,27 @@
 - `flutter_tts`
 - `lua54.dll`
 
-## التشغيل
+## التشغيل المحلي
 
 1. نفّذ `flutter pub get`
-2. ضع `lua54.dll` في مسار التحميل المناسب
+2. ضع `lua54.dll` في مسار التحميل المناسب أو بجانب التطبيق
 3. ابنِ العامل `Ucpae.AccessibilityWorker`
 4. شغّل التطبيق
+
+## GitHub Actions
+
+يوجد workflow مخصص لبناء نسخة Windows على GitHub:
+
+- `.github/workflows/build-windows-app.yml`
+
+هذا المسار يقوم بـ:
+
+- تنزيل مصدر Lua الرسمي
+- بناء `lua54.dll`
+- بناء عامل الوصولية
+- بناء تطبيق Flutter Windows
+- نسخ `lua54.dll` والعامل داخل الـ bundle النهائي
+- رفع الناتج كـ artifact
 
 ## الملفات المهمة
 

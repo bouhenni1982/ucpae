@@ -1,0 +1,89 @@
+name: build-windows-app
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - apps/ucpae_windows/**
+      - packages/ucpae_core/**
+      - .github/workflows/build-windows-app.yml
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          channel: stable
+          cache: true
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Set up MSVC build environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Download Lua source
+        shell: pwsh
+        run: |
+          $version = '5.4.8'
+          $sha256 = '4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae'
+          New-Item -ItemType Directory -Force third_party\lua | Out-Null
+          Invoke-WebRequest -Uri "https://www.lua.org/ftp/lua-$version.tar.gz" -OutFile "third_party\lua\lua-$version.tar.gz"
+          $hash = (Get-FileHash "third_party\lua\lua-$version.tar.gz" -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne $sha256) {
+            throw "Lua checksum mismatch: $hash"
+          }
+          tar -xf "third_party\lua\lua-$version.tar.gz" -C third_party\lua
+
+      - name: Build lua54.dll
+        shell: pwsh
+        run: |
+          $src = Resolve-Path 'third_party\lua\lua-5.4.8\src'
+          $sources = Get-ChildItem $src\*.c | Where-Object { $_.Name -notin @('lua.c', 'luac.c') } | ForEach-Object { $_.FullName }
+          $outDir = Resolve-Path 'apps\ucpae_windows\windows\runner\third_party\lua'
+          New-Item -ItemType Directory -Force $outDir | Out-Null
+          cl /nologo /O2 /MD /DLUA_BUILD_AS_DLL /DLUA_USE_WINDOWS /I $src $sources /link /DLL /OUT:"$outDir\lua54.dll"
+
+      - name: Get Windows app dependencies
+        working-directory: apps/ucpae_windows
+        run: flutter pub get
+
+      - name: Test Windows app
+        working-directory: apps/ucpae_windows
+        run: flutter test
+
+      - name: Analyze Windows app
+        working-directory: apps/ucpae_windows
+        run: flutter analyze
+
+      - name: Publish Windows worker
+        working-directory: apps/ucpae_windows/windows/worker/Ucpae.AccessibilityWorker
+        run: dotnet publish -c Release -o publish
+
+      - name: Build Flutter Windows app
+        working-directory: apps/ucpae_windows
+        run: flutter build windows --release
+
+      - name: Bundle worker with app
+        shell: pwsh
+        run: |
+          $bundle = Resolve-Path 'apps\ucpae_windows\build\windows\x64\runner\Release'
+          New-Item -ItemType Directory -Force "$bundle\worker" | Out-Null
+          Copy-Item 'apps\ucpae_windows\windows\worker\Ucpae.AccessibilityWorker\publish\Ucpae.AccessibilityWorker.exe' "$bundle\worker\Ucpae.AccessibilityWorker.exe" -Force
+          Copy-Item 'apps\ucpae_windows\windows\runner\third_party\lua\lua54.dll' "$bundle\lua54.dll" -Force
+
+      - name: Upload Windows app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ucpae-windows-app
+          path: apps/ucpae_windows/build/windows/x64/runner/Release

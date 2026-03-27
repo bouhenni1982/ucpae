@@ -31,3 +31,6 @@ apps/ucpae_android/android/app/src/main/jniLibs/**/liblua.so
 **/bin/
 **/obj/
 **/publish/
+
+# Downloaded third-party sources
+third_party/lua/

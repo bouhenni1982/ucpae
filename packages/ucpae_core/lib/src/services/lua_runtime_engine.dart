@@ -1,8 +1,8 @@
-import 'dart:ffi';
+import 'dart:ffi' as ffi;
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/lua_command.dart';
 import '../models/screen_event.dart';
@@ -13,18 +13,18 @@ class LuaRuntimeEngine {
   static const int _luaTypeTable = 5;
   static const String _assetPrefix = 'packages/ucpae_core/assets/lua';
 
-  Pointer<Void>? _state;
+  ffi.Pointer<ffi.Void>? _state;
   LuaBindings? _bindings;
   bool _initialized = false;
 
   bool get isInitialized => _initialized;
 
   Future<void> initialize() async {
-    final DynamicLibrary library = _openLuaLibrary();
+    final ffi.DynamicLibrary library = _openLuaLibrary();
     final LuaBindings bindings = LuaBindings(library);
-    final Pointer<Void> state = bindings.luaLNewState();
+    final ffi.Pointer<ffi.Void> state = bindings.luaLNewState();
 
-    if (state == nullptr) {
+    if (state == ffi.nullptr) {
       throw StateError('Failed to create Lua state.');
     }
 
@@ -64,13 +64,13 @@ end
 
   Future<LuaCommand> handle(ScreenEvent event) async {
     final LuaBindings bindings = _bindings!;
-    final Pointer<Void> state = _state!;
+    final ffi.Pointer<ffi.Void> state = _state!;
 
     bindings.luaSetTop(state, 0);
     _pushGlobalFunction(bindings, state, 'ucpae_handle');
     _pushEventTable(bindings, state, event);
 
-    final int callResult = bindings.luaPCallK(state, 1, 1, 0, 0, nullptr);
+    final int callResult = bindings.luaPCallK(state, 1, 1, 0, 0, ffi.nullptr);
     if (callResult != _luaOk) {
       final String message = _readString(bindings, state, -1) ?? 'Unknown Lua error';
       bindings.luaSetTop(state, 0);
@@ -93,7 +93,7 @@ end
   }
 
   void dispose() {
-    final Pointer<Void>? state = _state;
+    final ffi.Pointer<ffi.Void>? state = _state;
     final LuaBindings? bindings = _bindings;
     if (state != null && bindings != null) {
       bindings.luaClose(state);
@@ -103,18 +103,18 @@ end
     _initialized = false;
   }
 
-  DynamicLibrary _openLuaLibrary() {
+  ffi.DynamicLibrary _openLuaLibrary() {
     if (Platform.isWindows) {
-      return DynamicLibrary.open('lua54.dll');
+      return ffi.DynamicLibrary.open('lua54.dll');
     }
     if (Platform.isAndroid) {
-      return DynamicLibrary.open('liblua.so');
+      return ffi.DynamicLibrary.open('liblua.so');
     }
     throw UnsupportedError('Lua runtime is currently configured for Windows and Android only.');
   }
 
-  void _executeChunk(LuaBindings bindings, Pointer<Void> state, String script) {
-    final Pointer<Utf8> source = script.toNativeUtf8();
+  void _executeChunk(LuaBindings bindings, ffi.Pointer<ffi.Void> state, String script) {
+    final ffi.Pointer<Utf8> source = script.toNativeUtf8();
     try {
       final int loadResult = bindings.luaLLoadString(state, source);
       if (loadResult != _luaOk) {
@@ -123,7 +123,7 @@ end
         throw StateError('Unable to load Lua bootstrap: $message');
       }
 
-      final int callResult = bindings.luaPCallK(state, 0, 0, 0, 0, nullptr);
+      final int callResult = bindings.luaPCallK(state, 0, 0, 0, 0, ffi.nullptr);
       if (callResult != _luaOk) {
         final String message = _readString(bindings, state, -1) ?? 'Unknown call error';
         bindings.luaSetTop(state, 0);
@@ -134,8 +134,8 @@ end
     }
   }
 
-  void _pushGlobalFunction(LuaBindings bindings, Pointer<Void> state, String name) {
-    final Pointer<Utf8> global = name.toNativeUtf8();
+  void _pushGlobalFunction(LuaBindings bindings, ffi.Pointer<ffi.Void> state, String name) {
+    final ffi.Pointer<Utf8> global = name.toNativeUtf8();
     try {
       bindings.luaGetGlobal(state, global);
     } finally {
@@ -143,7 +143,7 @@ end
     }
   }
 
-  void _pushEventTable(LuaBindings bindings, Pointer<Void> state, ScreenEvent event) {
+  void _pushEventTable(LuaBindings bindings, ffi.Pointer<ffi.Void> state, ScreenEvent event) {
     bindings.luaCreateTable(state, 0, 7);
     _setStringField(bindings, state, 'type', event.type.name);
     _setStringField(bindings, state, 'role', event.role);
@@ -156,12 +156,12 @@ end
 
   void _setStringField(
     LuaBindings bindings,
-    Pointer<Void> state,
+    ffi.Pointer<ffi.Void> state,
     String key,
     String value,
   ) {
-    final Pointer<Utf8> luaValue = value.toNativeUtf8();
-    final Pointer<Utf8> luaKey = key.toNativeUtf8();
+    final ffi.Pointer<Utf8> luaValue = value.toNativeUtf8();
+    final ffi.Pointer<Utf8> luaKey = key.toNativeUtf8();
     try {
       bindings.luaPushString(state, luaValue);
       bindings.luaSetField(state, -2, luaKey);
@@ -173,16 +173,16 @@ end
 
   void _setNullableStringField(
     LuaBindings bindings,
-    Pointer<Void> state,
+    ffi.Pointer<ffi.Void> state,
     String key,
     String? value,
   ) {
-    final Pointer<Utf8> luaKey = key.toNativeUtf8();
+    final ffi.Pointer<Utf8> luaKey = key.toNativeUtf8();
     try {
       if (value == null) {
         bindings.luaPushNil(state);
       } else {
-        final Pointer<Utf8> luaValue = value.toNativeUtf8();
+        final ffi.Pointer<Utf8> luaValue = value.toNativeUtf8();
         try {
           bindings.luaPushString(state, luaValue);
         } finally {
@@ -197,11 +197,11 @@ end
 
   String? _readTableStringField(
     LuaBindings bindings,
-    Pointer<Void> state,
+    ffi.Pointer<ffi.Void> state,
     int index,
     String field,
   ) {
-    final Pointer<Utf8> luaField = field.toNativeUtf8();
+    final ffi.Pointer<Utf8> luaField = field.toNativeUtf8();
     try {
       bindings.luaGetField(state, index, luaField);
       final String? value = _readString(bindings, state, -1);
@@ -212,11 +212,11 @@ end
     }
   }
 
-  String? _readString(LuaBindings bindings, Pointer<Void> state, int index) {
-    final Pointer<Size> length = malloc<Size>();
+  String? _readString(LuaBindings bindings, ffi.Pointer<ffi.Void> state, int index) {
+    final ffi.Pointer<ffi.Size> length = malloc<ffi.Size>();
     try {
-      final Pointer<Utf8> value = bindings.luaToLString(state, index, length);
-      if (value == nullptr) {
+      final ffi.Pointer<Utf8> value = bindings.luaToLString(state, index, length);
+      if (value == ffi.nullptr) {
         return null;
       }
       return value.toDartString(length: length.value);

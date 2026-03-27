@@ -28,9 +28,9 @@ This keeps each app smaller and easier to maintain:
 - `apps/ucpae_windows`
   Windows Flutter app, official Windows scaffold, UI Automation worker, Windows TTS, and `lua54.dll` integration.
 - `scripts`
-  Bootstrap, native library preparation, and local development helpers.
+  Bootstrap, native library preparation, local Android Lua build, and development helpers.
 - `.github/workflows`
-  CI and artifact workflows for the monorepo.
+  CI, packaging, and Windows build workflows for the monorepo.
 
 ## Current Status
 
@@ -41,15 +41,16 @@ What is already in place:
 - Official Flutter scaffold for both Android and Windows apps
 - Android accessibility bridge prototype
 - Windows worker prototype for UI Automation
-- GitHub Actions for CI, worker build, shared artifacts, analysis, and tests
+- GitHub Actions for CI, worker build, shared artifacts, analysis, tests, and Windows app build
 - Local `flutter analyze` passes for both apps
 - Local `flutter test` passes for both apps
+- Local Android `app-debug.apk` build succeeds after generating `liblua.so`
 
 What still needs completion for full production builds:
 
-- Final Android packaging pipeline with real `liblua.so`
-- Final Windows desktop packaging pipeline with real `lua54.dll`
-- Automatic native library bundling during release builds
+- Final signed Android release pipeline
+- Verification of the Windows GitHub Action bundle on the first CI run
+- Automatic native library bundling for tagged releases
 - End-to-end on-device accessibility validation
 
 ## Quick Start
@@ -60,7 +61,19 @@ What still needs completion for full production builds:
 ./scripts/bootstrap.ps1
 ```
 
-### 2. Prepare native Lua libraries
+### 2. Build Android Lua libraries locally
+
+```powershell
+./scripts/build-lua-android.ps1
+```
+
+### 3. Build Android locally
+
+```powershell
+./scripts/build-android.ps1
+```
+
+### 4. Prepare native Lua libraries manually if needed
 
 ```powershell
 ./scripts/prepare-lua-libs.ps1 `
@@ -70,7 +83,7 @@ What still needs completion for full production builds:
   -AndroidX64So C:\path\to\x86_64\liblua.so
 ```
 
-### 3. Run local development
+### 5. Run local development
 
 Android:
 
@@ -93,6 +106,8 @@ Windows:
   Publishes the Windows worker and shared Lua assets as artifacts.
 - [native-libs-check.yml](./.github/workflows/native-libs-check.yml)
   Verifies expected native library directories exist.
+- [build-windows-app.yml](./.github/workflows/build-windows-app.yml)
+  Downloads official Lua source, builds `lua54.dll`, builds the Windows worker, builds the Flutter Windows app, bundles the worker and DLL, and uploads the final Windows app artifact.
 
 ## Arabic Documentation
 
@@ -103,7 +118,8 @@ Arabic technical explanation is available in:
 ## Notes
 
 - Native Lua binaries are intentionally not committed to the repository.
-- CI currently validates the repository structure and application code, but final platform release builds still depend on supplying the native Lua binaries.
+- Downloaded Lua source used for local builds is kept out of git.
+- CI validates code structure and now includes a dedicated Windows app build workflow.
 
 ## License
 
